@@ -1,5 +1,5 @@
 This is a multi-threaded CPU miner for Litecoin and Bitcoin,
-and now xcoin, forked from poolers cpuminer which is a 
+and now chaincoin, forked from poolers cpuminer which is a 
 fork of Jeff Garzik's reference cpuminer.
 
 Git tree: https://github.com/Neisklar/quarkcoin-cpuminer

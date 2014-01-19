@@ -29,11 +29,11 @@ typedef struct {
 	sph_shavite512_context  shavite1;
 	sph_simd512_context		simd1;
 	sph_echo512_context		echo1;
-} Xhash_context_holder;
+} chainhash_context_holder;
 
-Xhash_context_holder base_contexts;
+chainhash_context_holder base_contexts;
 
-void init_Xhash_contexts()
+void init_chainhash_contexts()
 {
     sph_blake512_init(&base_contexts.blake1);	
     sph_bmw512_init(&base_contexts.bmw1);	
@@ -48,16 +48,15 @@ void init_Xhash_contexts()
     sph_echo512_init(&base_contexts.echo1);
 }
 
-static void Xhash(void *state, const void *input)
+static void chainhash(void *state, const void *input)
 {
 
-	Xhash_context_holder ctx;
+	chainhash_context_holder ctx;
 	
     uint32_t hashA[16], hashB[16];	
 	//blake-bmw-groestl-sken-jh-meccak-luffa-cubehash-shivite-simd-echo
 	memcpy(&ctx, &base_contexts, sizeof(base_contexts));
 	
-
     sph_blake512 (&ctx.blake1, input, 80);
     sph_blake512_close (&ctx.blake1, hashA);		
 
@@ -67,15 +66,15 @@ static void Xhash(void *state, const void *input)
     sph_groestl512 (&ctx.groestl1, hashB, 64); 
     sph_groestl512_close(&ctx.groestl1, hashA);
    
+    sph_jh512 (&ctx.jh1, hashA, 64); 
+    sph_jh512_close(&ctx.jh1, hashB);
+  
+    sph_keccak512 (&ctx.keccak1, hashB, 64); 
+    sph_keccak512_close(&ctx.keccak1, hashA);
+   
     sph_skein512 (&ctx.skein1, hashA, 64); 
     sph_skein512_close(&ctx.skein1, hashB); 
    
-    sph_jh512 (&ctx.jh1, hashB, 64); 
-    sph_jh512_close(&ctx.jh1, hashA);
-  
-    sph_keccak512 (&ctx.keccak1, hashA, 64); 
-    sph_keccak512_close(&ctx.keccak1, hashB);
-	
 	sph_luffa512 (&ctx.luffa1, hashB, 64);
     sph_luffa512_close (&ctx.luffa1, hashA);	
     	
@@ -95,7 +94,7 @@ static void Xhash(void *state, const void *input)
 	
 }
 
-int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
+int scanhash_chain(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done)
 {        
  uint32_t n = pdata[19] - 1;
@@ -117,7 +116,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (((hash64[7]&0xFFFFFFFF)==0) &&
                                         fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
@@ -130,7 +129,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (((hash64[7]&0xFFFFFFF0)==0) &&
                                         fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
@@ -143,7 +142,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (((hash64[7]&0xFFFFFF00)==0) &&
                                         fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
@@ -156,7 +155,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (((hash64[7]&0xFFFFF000)==0) &&
                                         fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
@@ -170,7 +169,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (((hash64[7]&0xFFFF0000)==0) &&
                                         fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
@@ -184,7 +183,7 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                 do {
                         pdata[19] = ++n;
                         be32enc(&endiandata[19], n);
-                        Xhash(hash64, &endiandata);
+                        chainhash(hash64, &endiandata);
                         if (fulltest(hash64, ptarget)) {
                                 *hashes_done = n - first_nonce + 1;
                                 return true;
@@ -197,39 +196,3 @@ int scanhash_X(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
         pdata[19] = n;
         return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
