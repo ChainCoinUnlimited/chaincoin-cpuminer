@@ -173,7 +173,7 @@ Options:\n\
                           scrypt    scrypt(1024, 1, 1) (default)\n\
                           sha256d   SHA-256d\n\
                           quark     Quarkcoin\n\
-						  chain     Chaincoin\n\
+                          chain     Chaincoin\n\
   -o, --url=URL         URL of mining server (default: " DEF_RPC_URL ")\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
